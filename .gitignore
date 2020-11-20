@@ -1,0 +1,52 @@
+# Unity
+[Tt]emp/
+[Oo]bj/
+[Ll]ibrary/
+[Bb]uild/
+[Bb]uilds/
+UnityGenerated/
+Assets/AssetStoreTools*
+.vs/
+
+# Visual Studio / MonoDevelop
+[Ee]xportedObj/
+.consulo/
+*.svd
+*.userprefs
+*.csproj
+*.pidb
+*.suo
+*.sln
+*.user
+*.unityproj
+*.booproj
+*.tmp
+*.pdb
+*.opendb
+
+# Android
+*.apk
+*.ap_
+
+# Dex VM
+*.dex
+
+# Java
+*.class
+
+# Unity3D generated meta files
+*.pidb.meta
+*.pdb.meta
+
+# Unity3D Generated File On Crash Reports
+sysinfo.txt
+
+# Generated files
+bin/
+gen/
+
+# MintPot
+*.keystore
+Assets/Resources/Scripts/Service/ResultSceneService.cs.orig
+Assets/Resources/Scripts/Manager/InformationSceneManager.cs.orig
+Assets/Resources/Scripts/Installer/ProjectContextIntaller.cs.orig
