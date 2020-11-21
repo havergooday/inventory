@@ -15,6 +15,6 @@ public class Node
 	public int ID { get; set; }
 	public string StorageID { get; set; }
 	public GameObject ItemObject;
-	public int CenterNodeID;
+	public Vector3 CenterPositon = new Vector3();
 	public List<Node> linkedNode;
 }

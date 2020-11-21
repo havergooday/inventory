@@ -22,6 +22,7 @@ public class NodeManager : MonoBehaviour {
 	public int m_currentOverIndex = -1;
 
 	public GameObject TestItem;
+	public GameObject TestItem2;
 
 	private void Awake()
 	{
@@ -66,18 +67,35 @@ public class NodeManager : MonoBehaviour {
 	{
 		if (Input.GetKeyDown(KeyCode.Space))
 		{
-			Debug.Log(m_nodeArray[7].Gameobject.transform.localPosition);
-
-			int[] tests = new int[] { 7, 0, 1, 2, 6, 7, 8, 12, 13, 14 };
+			int[] tests = new int[] { 0, 1, 2, 6, 7, 8, 12, 13, 14 };
 			SetItem(tests, TestItem);
+
+			int[] tests2 = new int[] { 21, 22, 27, 28 };
+			SetItem(tests2, TestItem2);
+
+			//0, Hcount, Hcount*Vcount -hcount +1 ,Hcount*Vcount
+			//0,3, 9-3+1), 9
+			//0,2, 4-2+1, 4
+			//0, 3, 6-3+1, 6
+			//0,1,1-1+1,1;
 		}
 		if (Input.GetKeyDown(KeyCode.A))
 		{
-			for (int i = 0; i < GetNodeByIndex(7).linkedNode.Count; i++)
-			{
-				Debug.Log(GetNodeByIndex(7).linkedNode[i].ID);
-			}
+			Debug.Log(GetNodeByIndex(0).Gameobject.transform.localPosition.x);
+			Debug.Log(GetNodeByIndex(0).Gameobject.transform.localPosition.y);
+			Debug.Log(GetNodeByIndex(14).Gameobject.transform.localPosition.x);
+			Debug.Log(GetNodeByIndex(14).Gameobject.transform.localPosition.y);
 
+			float xdel = GetNodeByIndex(14).Gameobject.transform.localPosition.x - GetNodeByIndex(0).Gameobject.transform.localPosition.x;
+			float ydel = GetNodeByIndex(14).Gameobject.transform.localPosition.y - GetNodeByIndex(0).Gameobject.transform.localPosition.y;
+
+			xdel *= 0.5f;
+			ydel *= 0.5f;
+
+			TestItem.transform.localPosition = new Vector3(
+				GetNodeByIndex(0).Gameobject.transform.localPosition.x + xdel,
+				GetNodeByIndex(0).Gameobject.transform.localPosition.y + ydel,
+				0);
 		}
 	}
 
@@ -106,7 +124,7 @@ public class NodeManager : MonoBehaviour {
 		{
 			nodes[i].StorageID = null;
 			nodes[i].ItemObject = null;
-			nodes[i].CenterNodeID = -1;
+			nodes[i].CenterPositon = Vector3.one;
 			nodes[i].linkedNode = null;
 		}
 	}
@@ -182,40 +200,75 @@ public class NodeManager : MonoBehaviour {
 
 		Debug.Log("[" + leftUp + "] [" + rightUp + "]\n[" + leftDown + "] [" + rightDown + "]\nCenter : " + calCenter);
 
-		int[] ints = new int[ItemVerticalCount * ItemHorizontalCount + 1];
+		int[] ints = new int[ItemVerticalCount * ItemHorizontalCount];
 		////전체 index를 계산
 		for (int k = 0; k < ItemVerticalCount; k++)
 		{
 			for (int i = 0; i < ItemHorizontalCount; i++)
 			{
 				int num = (m_horizontalCount * k) + (leftDown + i);
-				ints[k * ItemHorizontalCount + i + 1] = num;
+				ints[k * ItemHorizontalCount + i] = num;
 			}
 		}
-
-		//array의 [0]은 calCenter
-		ints[0] = calCenter;
 
 		return ints;
 	}
 
-	public void SetItem(int[] ints, GameObject itemObj)
+	public bool SetItem(int[] ints, GameObject itemObj)
 	{
 		//칸 겹침 유효성 체크는 일단 넘어갑시다
+		//겹치는게 한개이상이면 안놔짐
+		if (CheckNodeToItem(ints, itemObj) >= 1)
+		{
+			Debug.Log("겹침: " + CheckNodeToItem(ints, itemObj));
+			return false;
+		}
 
-		for (int i = 1; i < ints.Length; i++)
+		for (int i = 0; i < ints.Length; i++)
 		{
 			GetNodeByIndex(ints[i]).ItemObject = itemObj;
-			GetNodeByIndex(ints[i]).CenterNodeID = ints[0];
+
+			int last = ints.Length - 1;
+
+			float xDel = GetNodeByIndex(ints[last]).Gameobject.transform.localPosition.x - GetNodeByIndex(ints[0]).Gameobject.transform.localPosition.x;
+			float yDel = GetNodeByIndex(ints[last]).Gameobject.transform.localPosition.y - GetNodeByIndex(ints[0]).Gameobject.transform.localPosition.y;
+
+			xDel *= 0.5f;
+			yDel *= 0.5f;
+
+			//GetNodeByIndex(ints[i]).CenterNodeID = intfs[0];
+			GetNodeByIndex(ints[i]).CenterPositon = new Vector3(GetNodeByIndex(ints[0]).Gameobject.transform.localPosition.x + xDel, GetNodeByIndex(ints[0]).Gameobject.transform.localPosition.y + yDel, 0);
 			GetNodeByIndex(ints[i]).linkedNode = new List<Node>();
 
-			for (int k = 1; k < ints.Length; k++)
+			for (int k = 0; k < ints.Length; k++)
 			{
 				GetNodeByIndex(ints[i]).linkedNode.Add(GetNodeByIndex(ints[k]));
 			}
 		}
 
 		//아이템 오브젝트 위치이동 
-		itemObj.transform.localPosition = GetNodeByIndex(ints[0]).Gameobject.transform.localPosition;
+		itemObj.gameObject.transform.localPosition = GetNodeByIndex(ints[0]).CenterPositon;
+		return true;
 	}
+
+	public int CheckNodeToItem(int[] ints, GameObject itemObj)
+	{
+		int clashCount = 0;
+		GameObject objTemp = null;
+
+		for (int i = 1; i < ints.Length; i++)
+		{
+			if (GetNodeByIndex(ints[i]).ItemObject != null)
+			{
+				if (objTemp != GetNodeByIndex(ints[i]).ItemObject)
+				{
+					clashCount++;
+				}
+				objTemp = GetNodeByIndex(ints[i]).ItemObject;
+			}
+		}
+
+		return clashCount;
+	}
+
 }

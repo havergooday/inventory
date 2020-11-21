@@ -96,7 +96,7 @@ public class SetItem_4 : MonoBehaviour {
 		{
 			nodes[i].StorageID = null;
 			nodes[i].ItemObject = null;
-			nodes[i].CenterNodeID = -1;
+			//nodes[i].CenterNodeID = -1;
 			nodes[i].linkedNode = null;
 		}
 	}
@@ -197,7 +197,7 @@ public class SetItem_4 : MonoBehaviour {
 		for (int i = 1; i < ints.Length; i++)
 		{
 			GetNodeByIndex(ints[i]).ItemObject = itemObj;
-			GetNodeByIndex(ints[i]).CenterNodeID = ints[0];
+			//GetNodeByIndex(ints[i]).CenterNodeID = ints[0];
 
 			for (int k = 1; k < ints.Length; k++)
 			{

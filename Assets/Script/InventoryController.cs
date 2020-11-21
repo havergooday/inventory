@@ -73,10 +73,15 @@ public class InventoryController : MonoBehaviour {
 				else
 				{
 					int[] items = m_inventoryNodeManager.CalItemPosition(3, 3);
-					m_inventoryNodeManager.SetItem(items, m_hand.GrapItemObject);
-
-					m_hand.m_grapItemID = null;
-					m_hand.GrapItemObject = null;
+					if (m_inventoryNodeManager.SetItem(items, m_hand.GrapItemObject))
+					{
+						m_hand.m_grapItemID = null;
+						m_hand.GrapItemObject = null;
+					}
+					else
+					{
+						//겹침
+					}
 				}
 			}
 		}
