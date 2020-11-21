@@ -72,7 +72,7 @@ public class InventoryController : MonoBehaviour {
 				}
 				else
 				{
-					int[] items = m_inventoryNodeManager.CalItemPosition(3, 3);
+					int[] items = m_inventoryNodeManager.CalItemPosition(2, 2);
 					if (m_inventoryNodeManager.SetItem(items, m_hand.GrapItemObject))
 					{
 						m_hand.m_grapItemID = null;

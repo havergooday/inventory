@@ -539,12 +539,12 @@ Prefab:
     - target: {fileID: 224149493796789838, guid: b33ea5c95d0e9724abb97a29b16c83f8,
         type: 2}
       propertyPath: m_SizeDelta.x
-      value: 150
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 224149493796789838, guid: b33ea5c95d0e9724abb97a29b16c83f8,
         type: 2}
       propertyPath: m_SizeDelta.y
-      value: 150
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 224149493796789838, guid: b33ea5c95d0e9724abb97a29b16c83f8,
         type: 2}
