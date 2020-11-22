@@ -17,6 +17,8 @@ public class InventoryController : MonoBehaviour {
 	private NodeManager m_currentNodeManager;
 	private int m_currentOverIndex;
 
+	private NodeManager m_prevNodemanager;
+
 	public void Awake()
 	{
 		m_inventoryNodeManager.NodeOverEvent += temp;
@@ -34,29 +36,45 @@ public class InventoryController : MonoBehaviour {
 	}
 	private void OutNode()
 	{
+		m_prevNodemanager = m_currentNodeManager;
 		m_currentNodeManager = null;
 		m_currentOverIndex = -1;
 	}
 
 	public void Update()
 	{
-		Debug.Log(m_currentNodeManager + ": " + m_currentOverIndex);
 
-		if (m_currentNodeManager == null) return;
+		if (m_hand.GrabItemObject != null)
+		{//쥐고있음
+			m_hand.GrabItemObject.transform.position = Input.mousePosition;
+		}
+
+		if (m_currentNodeManager == null)
+		{
+			if (m_prevNodemanager != null)
+			{
+				m_prevNodemanager.ClearNodeColor();
+				m_prevNodemanager = null;
+			}
+			return;
+		}
+
 
 		if (Input.GetMouseButtonDown(0))
 		{
+			Node m_currentNode = m_currentNodeManager.GetNodeByIndex(m_currentOverIndex);
+
 			if (m_hand.GrabItemObject == null)
 			{//손이 비어있는 상태
 				if (m_currentOverIndex >= 0)
 				{//템창 위다
-					if (m_currentNodeManager.GetNodeByIndex(m_currentOverIndex).ItemObject != null)
+					if (m_currentNode.ItemObject != null)
 					{//템이 있다
-					 //템 줍기
+
 						//템은 손으로 이동
-						m_hand.GrabItemObject = m_currentNodeManager.GetNodeByIndex(m_currentOverIndex).ItemObject;
+						m_hand.GrabItemObject = m_currentNode.ItemObject;
 						//인벤 노드 초기화
-						m_currentNodeManager.InitialNode((m_currentNodeManager.GetNodeByIndex(m_currentOverIndex)));
+						m_currentNodeManager.InitialNode((m_currentNode));
 					}
 					else
 					{//탬이 없다
@@ -90,8 +108,6 @@ public class InventoryController : MonoBehaviour {
 						//한개겹침
 						//잠깐 치워둠
 						Item temp = m_hand.GrabItemObject;
-						Node grap = m_currentNodeManager.GetNodeByIndex(m_currentOverIndex);
-
 
 						Node tempNode = m_currentNodeManager.CheckClash(items);
 						//템을 주움
@@ -105,32 +121,32 @@ public class InventoryController : MonoBehaviour {
 					{
 						//여러개 겹침
 					}
+
+					for (int i = 0; i < m_currentNodeManager.m_nodeArray.Length; i++)
+					{
+						if (m_currentNodeManager.GetNodeByIndex(i).ItemObject != null)
+							ChangeColor(m_currentNodeManager.GetNodeByIndex(i).ItemObject.gameObject, Constant.defaultColor);
+
+						ChangeColor(m_currentNodeManager.GetNodeByIndex(i).Gameobject, Constant.defaultColor);
+					}
 				}
 			}
 		}
 
 
+		//놓기전 색깔 검사
 		if (m_hand.GrabItemObject != null)
 		{//쥐고있음
-			m_hand.GrabItemObject.transform.position = Input.mousePosition;
+			//m_hand.GrabItemObject.transform.position = Input.mousePosition;
 			if (m_currentOverIndex >= 0)
 			{
 				int[] items = m_currentNodeManager.CalItemPosition(m_currentOverIndex, m_hand.GrabItemObject.m_horizonCount, m_hand.GrabItemObject.m_verticalCount);
 
-
-				for (int i = 0; i < m_currentNodeManager.m_nodeArray.Length; i++)
-				{
-					if (m_currentNodeManager.GetNodeByIndex(i).ItemObject != null)
-						ChangeColor(m_currentNodeManager.GetNodeByIndex(i).ItemObject.gameObject, Constant.defaultColor);
-				}
+				m_currentNodeManager.ClearNodeColor();
 
 				if (m_currentNodeManager.CheckClashCount(items) == 1)
 				{//템이 있는데 한개다
 
-					for (int i = 0; i < m_currentNodeManager.m_nodeArray.Length; i++)
-					{
-						ChangeColor(m_currentNodeManager.GetNodeByIndex(i).Gameobject, Constant.defaultColor);
-					}
 					for (int i = 0; i < items.Length; i++)
 					{
 						ChangeColor(m_currentNodeManager.GetNodeByIndex(items[i]).Gameobject, Constant.selectColor);
@@ -141,10 +157,6 @@ public class InventoryController : MonoBehaviour {
 				}
 				else if (m_currentNodeManager.CheckClashCount(items) >= 2)
 				{
-					for (int i = 0; i < m_currentNodeManager.m_nodeArray.Length; i++)
-					{
-						ChangeColor(m_currentNodeManager.GetNodeByIndex(i).Gameobject, Constant.defaultColor);
-					}
 					for (int i = 0; i < items.Length; i++)
 					{
 						ChangeColor(m_currentNodeManager.GetNodeByIndex(items[i]).Gameobject, Constant.cantdropColor);
@@ -152,10 +164,7 @@ public class InventoryController : MonoBehaviour {
 				}
 				else
 				{//템이 없다
-					for (int i = 0; i < m_currentNodeManager.m_nodeArray.Length; i++)
-					{
-						ChangeColor(m_currentNodeManager.GetNodeByIndex(i).Gameobject, Constant.defaultColor);
-					}
+			
 					for (int i = 0; i < items.Length; i++)
 					{
 						ChangeColor(m_currentNodeManager.GetNodeByIndex(items[i]).Gameobject, Constant.selectColor);
