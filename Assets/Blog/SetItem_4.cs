@@ -94,7 +94,6 @@ public class SetItem_4 : MonoBehaviour {
 		List<Node> nodes = GetNodeByIndex(node.ID).linkedNode;
 		for (int i = 0; i < nodes.Count; i++)
 		{
-			nodes[i].StorageID = null;
 			nodes[i].ItemObject = null;
 			//nodes[i].CenterNodeID = -1;
 			nodes[i].linkedNode = null;

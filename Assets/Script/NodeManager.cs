@@ -8,6 +8,13 @@ using UnityEngine.UI;
 
 public class NodeManager : MonoBehaviour {
 
+	public delegate void NodeOverDelegate(Node currentNode);
+	public event NodeOverDelegate NodeOverEvent;
+
+	public delegate void NodeOutDelegate();
+	public event NodeOutDelegate NodeOutEvnet;
+
+
 	public int m_totalIndex = 30;
 
 	//node
@@ -40,14 +47,21 @@ public class NodeManager : MonoBehaviour {
 		for (int i = 0; i < m_totalIndex; i++)
 		{
 			GameObject obj = (GameObject)Instantiate(m_node);
-			obj.name = "[" + i%m_horizontalCount + ", " + i/m_horizontalCount + "]\n" + i;
+			obj.name = "[" + i % m_horizontalCount + ", " + i / m_horizontalCount + "]\n" + i;
 			obj.GetComponentInChildren<Text>().text = obj.name;
 			obj.transform.SetParent(m_nodeParents.transform);
+
+			m_nodeArray[i] = new Node
+			{
+				Gameobject = obj,
+				ID = i,
+				Manager = this,
+			};
 
 			int temp = i;
 			EventTrigger.Entry enter = new EventTrigger.Entry();
 			enter.eventID = EventTriggerType.PointerEnter;
-			enter.callback.AddListener((eventData) => SetOverIndex(temp));
+			enter.callback.AddListener((eventData) => SetOverNode(m_nodeArray[temp]));
 			obj.GetComponent<EventTrigger>().triggers.Add(enter);
 
 			EventTrigger.Entry exit = new EventTrigger.Entry();
@@ -55,11 +69,6 @@ public class NodeManager : MonoBehaviour {
 			exit.callback.AddListener((eventData) => ResetOverIndex());
 			obj.GetComponent<EventTrigger>().triggers.Add(exit);
 
-			m_nodeArray[i] = new Node
-			{
-				ID = i,
-				Gameobject = obj
-			};
 		}
 	}
 	public void Update()
@@ -109,14 +118,14 @@ public class NodeManager : MonoBehaviour {
 		}
 	}
 
-	public void SetOverIndex(int index)
+	public void SetOverNode(Node node)
 	{
-		m_currentOverIndex = index;
+		NodeOverEvent.Invoke(node);
 	}
 
 	private void ResetOverIndex()
 	{
-		m_currentOverIndex = -1;
+		NodeOutEvnet.Invoke();
 	}
 
 	public void InitialNode(Node node)
@@ -125,7 +134,6 @@ public class NodeManager : MonoBehaviour {
 
 		for (int i = 0; i < nodes.Count; i++)
 		{
-			nodes[i].StorageID = null;
 			nodes[i].ItemObject = null;
 			nodes[i].CenterPositon = Vector3.one;
 			nodes[i].linkedNode = null;
@@ -140,45 +148,45 @@ public class NodeManager : MonoBehaviour {
 		return m_nodeArray[index];
 	}
 
-	public int[] CalItemPosition(int ItemHorizontalCount, int ItemVerticalCount)
+	public int[] CalItemPosition(int currentPos, int ItemHorizontalCount, int ItemVerticalCount)
 	{
-		if (m_currentOverIndex < 0) return null;
+		if (currentPos < 0) return null;
 
 		int calHorizonRight = ItemHorizontalCount / 2;
 		int calVerticalUp = ItemVerticalCount / 2;
 		int calHorizonLeft = calHorizonRight + (ItemHorizontalCount % 2) -1;
 		int calVerticalDown = calVerticalUp + (ItemVerticalCount % 2) -1;
-		int calCenter = m_currentOverIndex;
+		int calCenter = currentPos;
 
-		if (m_currentOverIndex + calHorizonRight >= m_currentOverIndex - (m_currentOverIndex % m_horizontalCount) + m_horizontalCount)
+		if (currentPos + calHorizonRight >= currentPos - (currentPos % m_horizontalCount) + m_horizontalCount)
 		{
 			calHorizonRight -= 1;
 			calHorizonLeft += 1;
 			calCenter -= 1;
 		}
-		if (m_currentOverIndex - calHorizonLeft < (m_currentOverIndex / m_horizontalCount) * m_horizontalCount)
+		if (currentPos - calHorizonLeft < (currentPos / m_horizontalCount) * m_horizontalCount)
 		{
 			calHorizonRight += 1;
 			calHorizonLeft -= 1;
 			calCenter += 1;
 		}
-		if (m_currentOverIndex + (calVerticalUp * m_horizontalCount) >= m_totalIndex)
+		if (currentPos + (calVerticalUp * m_horizontalCount) >= m_totalIndex)
 		{
 			calVerticalUp -= 1;
 			calVerticalDown += 1;
 			calCenter -= m_horizontalCount;
 		}
-		if (m_currentOverIndex - (calVerticalDown * m_horizontalCount) < 0)
+		if (currentPos - (calVerticalDown * m_horizontalCount) < 0)
 		{
 			calVerticalUp += 1;
 			calVerticalDown -= 1;
 			calCenter += m_horizontalCount;
 		}
 
-		if (m_currentOverIndex + calHorizonRight >= m_currentOverIndex - (m_currentOverIndex % m_horizontalCount) + m_horizontalCount
-			|| m_currentOverIndex - calHorizonLeft < (m_currentOverIndex / m_horizontalCount) * m_horizontalCount
-			|| m_currentOverIndex + (calVerticalUp * m_horizontalCount) >= m_totalIndex
-			|| m_currentOverIndex - (calVerticalDown * m_horizontalCount) < 0
+		if (currentPos + calHorizonRight >= currentPos - (currentPos % m_horizontalCount) + m_horizontalCount
+			|| currentPos - calHorizonLeft < (currentPos / m_horizontalCount) * m_horizontalCount
+			|| currentPos + (calVerticalUp * m_horizontalCount) >= m_totalIndex
+			|| currentPos - (calVerticalDown * m_horizontalCount) < 0
 			|| calCenter < 0
 			|| calCenter > m_totalIndex)
 		{
@@ -186,19 +194,19 @@ public class NodeManager : MonoBehaviour {
 			return null;
 		}
 
-		int leftDown = m_currentOverIndex;
+		int leftDown = currentPos;
 		leftDown -= calHorizonLeft;
 		leftDown -= calVerticalDown * m_horizontalCount;
 
-		int leftUp = m_currentOverIndex;
+		int leftUp = currentPos;
 		leftUp -= calHorizonLeft;
 		leftUp += calVerticalUp * m_horizontalCount;
 
-		int rightDown = m_currentOverIndex;
+		int rightDown = currentPos;
 		rightDown += calHorizonRight;
 		rightDown -= calVerticalDown * m_horizontalCount;
 
-		int rightUp = m_currentOverIndex;
+		int rightUp = currentPos;
 		rightUp += calHorizonRight;
 		rightUp += calVerticalUp * m_horizontalCount;
 
@@ -218,7 +226,7 @@ public class NodeManager : MonoBehaviour {
 		return ints;
 	}
 
-	public int SetItem(int[] ints, Item item)
+	public void SetItem(int[] ints, Item item)
 	{
 		for (int i = 0; i < ints.Length; i++)
 		{
@@ -243,8 +251,7 @@ public class NodeManager : MonoBehaviour {
 		}
 
 		//아이템 오브젝트 위치이동 
-		item.gameObject.transform.localPosition = GetNodeByIndex(ints[0]).CenterPositon;
-		return 0;
+		item.gameObject.transform.localPosition = GetNodeByIndex(ints[0]).CenterPositon + m_nodeParents.transform.localPosition;
 	}
 
 	public int CheckClashCount(int[] ints)
