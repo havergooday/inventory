@@ -196,7 +196,7 @@ public class SetItem_4 : MonoBehaviour {
 		//칸 겹침 유효성 체크는 일단 넘어갑시다
 		for (int i = 1; i < ints.Length; i++)
 		{
-			GetNodeByIndex(ints[i]).ItemObject = itemObj;
+			//GetNodeByIndex(ints[i]).ItemObject = itemObj;
 			//GetNodeByIndex(ints[i]).CenterNodeID = ints[0];
 
 			for (int k = 1; k < ints.Length; k++)

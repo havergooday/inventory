@@ -14,7 +14,7 @@ public class Node
 	public GameObject Gameobject { get; set; }
 	public int ID { get; set; }
 	public string StorageID { get; set; }
-	public GameObject ItemObject;
+	public Item ItemObject;
 	public Vector3 CenterPositon = new Vector3();
 	public List<Node> linkedNode;
 }

@@ -6,5 +6,7 @@ public class HandScript : MonoBehaviour {
 
 	public NodeManager m_targetNodeManager;
 	public string m_grapItemID;
-	public GameObject GrapItemObject;
+	public Item GrabItemObject;
+	public int GrabItemHorizon;
+	public int GrabItemVertical;
 }

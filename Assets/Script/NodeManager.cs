@@ -17,18 +17,17 @@ public class NodeManager : MonoBehaviour {
 	private int m_vertialCount;
 	public IntVector2 m_nodeSize = new IntVector2(48,48);
 
-	private Node[] m_nodeArray;
+	public Node[] m_nodeArray;
 
 	public int m_currentOverIndex = -1;
 
-	public GameObject TestItem;
-	public GameObject TestItem2;
+	public Item TestItem;
+	public Item TestItem2;
+	public Item TestItem3;
 
 	private void Awake()
 	{
 		CreateSlot();
-
-		
 	}
 
 	private void CreateSlot()
@@ -68,34 +67,45 @@ public class NodeManager : MonoBehaviour {
 		if (Input.GetKeyDown(KeyCode.Space))
 		{
 			int[] tests = new int[] { 0, 1, 2, 6, 7, 8, 12, 13, 14 };
+			TestItem.m_horizonCount = 3;
+			TestItem.m_verticalCount = 3;
 			SetItem(tests, TestItem);
 
 			int[] tests2 = new int[] { 21, 22, 27, 28 };
+			TestItem2.m_horizonCount = 2;
+			TestItem2.m_verticalCount = 2;
 			SetItem(tests2, TestItem2);
 
-			//0, Hcount, Hcount*Vcount -hcount +1 ,Hcount*Vcount
-			//0,3, 9-3+1), 9
-			//0,2, 4-2+1, 4
-			//0, 3, 6-3+1, 6
-			//0,1,1-1+1,1;
+			int[] tests3 = new int[] { 4, 5, 10, 11 };
+			TestItem3.m_horizonCount = 2;
+			TestItem3.m_verticalCount = 2;
+			SetItem(tests3, TestItem3);
 		}
-		if (Input.GetKeyDown(KeyCode.A))
+
+		if(Input.GetKeyDown(KeyCode.A))
 		{
-			Debug.Log(GetNodeByIndex(0).Gameobject.transform.localPosition.x);
-			Debug.Log(GetNodeByIndex(0).Gameobject.transform.localPosition.y);
-			Debug.Log(GetNodeByIndex(14).Gameobject.transform.localPosition.x);
-			Debug.Log(GetNodeByIndex(14).Gameobject.transform.localPosition.y);
+			string str = "";
+			for (int i = 0; i < m_nodeArray.Length; i++)
+			{
+				if (m_nodeArray[i].ItemObject != null)
+				{
+					str += i;
+					str += "/";
+				}
+			}
+			Debug.Log(str);
+		}
+		if (Input.GetKeyDown(KeyCode.S))
+		{
+			string str = "";
+			List<Node> nodes = GetNodeByIndex(m_currentOverIndex).linkedNode;
+			for (int i = 0; i < nodes.Count; i++)
+			{
 
-			float xdel = GetNodeByIndex(14).Gameobject.transform.localPosition.x - GetNodeByIndex(0).Gameobject.transform.localPosition.x;
-			float ydel = GetNodeByIndex(14).Gameobject.transform.localPosition.y - GetNodeByIndex(0).Gameobject.transform.localPosition.y;
-
-			xdel *= 0.5f;
-			ydel *= 0.5f;
-
-			TestItem.transform.localPosition = new Vector3(
-				GetNodeByIndex(0).Gameobject.transform.localPosition.x + xdel,
-				GetNodeByIndex(0).Gameobject.transform.localPosition.y + ydel,
-				0);
+				str += nodes[i].ID;
+				str += "/";
+			}
+			Debug.Log(str);
 		}
 	}
 
@@ -108,18 +118,11 @@ public class NodeManager : MonoBehaviour {
 	{
 		m_currentOverIndex = -1;
 	}
-	
-	private void ResetColor()
-	{
-		for (int i = 0; i < m_nodeArray.Length; i++)
-		{
-			Utility.ChangeColor(m_nodeArray[i].Gameobject, Constant.defaultColor);
-		}
-	}
 
 	public void InitialNode(Node node)
 	{
 		List<Node> nodes = GetNodeByIndex(node.ID).linkedNode;
+
 		for (int i = 0; i < nodes.Count; i++)
 		{
 			nodes[i].StorageID = null;
@@ -128,6 +131,7 @@ public class NodeManager : MonoBehaviour {
 			nodes[i].linkedNode = null;
 		}
 	}
+
 	public Node GetNodeByIndex(int index)
 	{
 		if (m_nodeArray.Length <= 0)
@@ -198,7 +202,7 @@ public class NodeManager : MonoBehaviour {
 		rightUp += calHorizonRight;
 		rightUp += calVerticalUp * m_horizontalCount;
 
-		Debug.Log("[" + leftUp + "] [" + rightUp + "]\n[" + leftDown + "] [" + rightDown + "]\nCenter : " + calCenter);
+		//Debug.Log("[" + leftUp + "] [" + rightUp + "]\n[" + leftDown + "] [" + rightDown + "]\nCenter : " + calCenter);
 
 		int[] ints = new int[ItemVerticalCount * ItemHorizontalCount];
 		////전체 index를 계산
@@ -214,19 +218,11 @@ public class NodeManager : MonoBehaviour {
 		return ints;
 	}
 
-	public bool SetItem(int[] ints, GameObject itemObj)
+	public int SetItem(int[] ints, Item item)
 	{
-		//칸 겹침 유효성 체크는 일단 넘어갑시다
-		//겹치는게 한개이상이면 안놔짐
-		if (CheckNodeToItem(ints, itemObj) >= 1)
-		{
-			Debug.Log("겹침: " + CheckNodeToItem(ints, itemObj));
-			return false;
-		}
-
 		for (int i = 0; i < ints.Length; i++)
 		{
-			GetNodeByIndex(ints[i]).ItemObject = itemObj;
+			GetNodeByIndex(ints[i]).ItemObject = item;
 
 			int last = ints.Length - 1;
 
@@ -247,16 +243,16 @@ public class NodeManager : MonoBehaviour {
 		}
 
 		//아이템 오브젝트 위치이동 
-		itemObj.gameObject.transform.localPosition = GetNodeByIndex(ints[0]).CenterPositon;
-		return true;
+		item.gameObject.transform.localPosition = GetNodeByIndex(ints[0]).CenterPositon;
+		return 0;
 	}
 
-	public int CheckNodeToItem(int[] ints, GameObject itemObj)
+	public int CheckClashCount(int[] ints)
 	{
 		int clashCount = 0;
-		GameObject objTemp = null;
+		Item objTemp = null;
 
-		for (int i = 1; i < ints.Length; i++)
+		for (int i = 0; i < ints.Length; i++)
 		{
 			if (GetNodeByIndex(ints[i]).ItemObject != null)
 			{
@@ -271,4 +267,21 @@ public class NodeManager : MonoBehaviour {
 		return clashCount;
 	}
 
+	public Node CheckClash(int[] ints)
+	{
+		Item objTemp = null;
+		for (int i = 0; i < ints.Length; i++)
+		{
+			if (GetNodeByIndex(ints[i]).ItemObject != null)
+			{
+				if (objTemp != GetNodeByIndex(ints[i]).ItemObject)
+				{
+					return GetNodeByIndex(ints[i]);
+				}
+				objTemp = GetNodeByIndex(ints[i]).ItemObject;
+			}
+		}
+
+		return null;
+	}
 }
