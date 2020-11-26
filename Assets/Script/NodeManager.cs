@@ -144,9 +144,6 @@ public class NodeManager : MonoBehaviour {
 	{
 		for (int i = 0; i < m_nodeArray.Length; i++)
 		{
-			if (m_nodeArray[i].ItemObject != null)
-				Utility.ChangeColor(m_nodeArray[i].ItemObject.gameObject, Constant.defaultColor);
-
 			Utility.ChangeColor(m_nodeArray[i].Gameobject, Constant.defaultColor);
 		}
 	}

@@ -21,15 +21,15 @@ public class InventoryController : MonoBehaviour {
 
 	public void Awake()
 	{
-		m_inventoryNodeManager.NodeOverEvent += temp;
+		m_inventoryNodeManager.NodeOverEvent += EnterNode;
 		m_inventoryNodeManager.NodeOutEvnet += OutNode;
 
-		m_inventoryNodeManager2.NodeOverEvent += temp;
+		m_inventoryNodeManager2.NodeOverEvent += EnterNode;
 		m_inventoryNodeManager2.NodeOutEvnet += OutNode;
 
 	}
 
-	private void temp(Node i)
+	private void EnterNode(Node i)
 	{
 		m_currentNodeManager = i.Manager;
 		m_currentOverIndex = i.ID;
@@ -124,9 +124,6 @@ public class InventoryController : MonoBehaviour {
 
 					for (int i = 0; i < m_currentNodeManager.m_nodeArray.Length; i++)
 					{
-						if (m_currentNodeManager.GetNodeByIndex(i).ItemObject != null)
-							ChangeColor(m_currentNodeManager.GetNodeByIndex(i).ItemObject.gameObject, Constant.defaultColor);
-
 						ChangeColor(m_currentNodeManager.GetNodeByIndex(i).Gameobject, Constant.defaultColor);
 					}
 				}
